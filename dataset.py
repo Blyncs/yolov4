@@ -13,6 +13,7 @@
 import os
 import random
 import sys
+import logging
 
 import cv2
 import numpy as np
@@ -138,9 +139,7 @@ def image_data_augmentation(mat, w, h, pleft, ptop, swidth, sheight, flip, dhue,
             if img.shape[2] >= 3:
                 hsv_src = cv2.cvtColor(sized.astype(np.float32), cv2.COLOR_RGB2HSV)  # RGB to HSV
                 hsv = cv2.split(hsv_src)
-                hsv[1] *= dsat
-                hsv[2] *= dexp
-                hsv[0] += 179 * dhue
+                hsv = [hsv[0] + 179 * dhue, hsv[1] * dsat, hsv[2] * dexp]
                 hsv_src = cv2.merge(hsv)
                 sized = np.clip(cv2.cvtColor(hsv_src, cv2.COLOR_HSV2RGB), 0, 255)  # HSV to RGB (the same as previous)
             else:
@@ -175,7 +174,7 @@ def image_data_augmentation(mat, w, h, pleft, ptop, swidth, sheight, flip, dhue,
             cv2.randn(noise, 0, gaussian_noise)  # mean and variance
             sized = sized + noise
     except:
-        print("OpenCV can't augment image: " + str(w) + " x " + str(h))
+        logging.exception("OpenCV can't augment image: " + str(w) + " x " + str(h))
         sized = mat
 
     return sized
